@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>몬티홀 게임을 직접 해 봅시다</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>:root{--font:'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;--ink:#111111;--canvas:#ffffff;--soft:#f5f5f5;--hairline:#cacacb;--mute:#707072;--sale:#d30005;--success:#007d48;--info:#1151ff}
+*{box-sizing:border-box}
+.wid{display:flex;gap:40px;height:100%}
+.ms-left,.ds-left{flex:1.6;display:flex;flex-direction:column;gap:22px}
+.ms-right,.ds-right{flex:1;background:var(--soft);padding:28px 32px;display:flex;flex-direction:column}
+.ms-modes{display:flex;gap:14px}
+.wchip{border:1px solid var(--hairline);border-radius:30px;padding:10px 26px;font-size:26px;font-weight:700;cursor:pointer;background:#fff}
+.wchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ms-doors{display:flex;gap:28px}
+.door{flex:1;height:200px;background:var(--soft);border:3px solid var(--hairline);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:64px;font-weight:900;cursor:pointer;position:relative}
+.door em{position:absolute;top:10px;font-style:normal;font-size:24px;font-weight:700;background:var(--ink);color:#fff;border-radius:30px;padding:2px 16px}
+.door.picked{border-color:var(--ink);border-width:6px}
+.door.opened{background:#e5e5e5;color:var(--mute);cursor:default}
+.door.opened.car{background:var(--sale);color:#fff}
+.door.revealcar{background:var(--success);color:#fff;border-color:var(--success)}
+.ms-msg{font-size:32px;line-height:1.35;min-height:88px}
+.ms-msg b{font-weight:900}.okc{color:var(--success)}.noc{color:var(--sale)}
+.ms-ctrl{display:flex;gap:16px;flex-wrap:wrap}
+.wbtn{font:700 28px var(--font);border:0;border-radius:30px;padding:14px 34px;cursor:pointer}
+.wbtn.pri{background:var(--ink);color:#fff}.wbtn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--hairline)}
+.ms-title{font-size:28px;font-weight:700;color:var(--mute);margin-bottom:12px}
+.ms-barrow{display:flex;gap:56px;flex:1;align-items:stretch;justify-content:center}
+.ms-bar{display:flex;flex-direction:column;align-items:center;width:200px}
+.ms-bartrack{flex:1;width:100%;background:#fff;display:flex;align-items:flex-end;min-height:150px}
+.ms-barfill{width:100%;transition:height .12s linear}
+.ms-barfill.ink{background:var(--ink)}.ms-barfill.ok{background:var(--success)}.ms-barfill.gray{background:#c9c9ca}
+.ms-barval{font-size:40px;font-weight:900;margin-top:10px}
+.ms-barlab{font-size:30px;font-weight:700}
+.ms-barcnt{font-size:26px;color:var(--mute)}
+.ms-void{font-size:24px;color:var(--mute);margin-top:14px}
+.ms-slider{display:flex;align-items:center;gap:18px;width:100%;margin-top:6px}
+.ms-sllab{font-size:30px;white-space:nowrap}.ms-sllab b{font-weight:900;font-size:40px}
+.ds-range{flex:1;accent-color:#111;height:36px}
+.ms-svg{width:100%;margin-top:6px}
+.ms-linehint{font-size:24px;color:var(--mute);margin-top:12px}
+
+.ms-steps{display:flex;gap:10px;flex-wrap:wrap}
+.ms-st{font-size:22px;font-weight:700;padding:6px 16px;border-radius:30px;background:var(--soft);color:var(--mute)}
+.ms-st.now{background:var(--ink);color:#fff}.ms-st.done{background:#e5e5e5;color:var(--ink)}
+.ms-act{min-height:176px;display:flex;flex-direction:column;gap:14px}
+.wbtn.big{font-size:34px;padding:20px 44px}
+.door.pulse{animation:dpulse 1.4s ease-in-out infinite}
+@keyframes dpulse{0%,100%{border-color:var(--hairline)}50%{border-color:var(--ink)}}
+.door.flip{animation:doorflip .7s ease-out}
+@keyframes doorflip{from{transform:perspective(900px) rotateY(88deg)}to{transform:perspective(900px) rotateY(0)}}
+.ms-rep{border-top:2px solid var(--hairline);padding-top:12px}
+.ms-reptitle{font-size:22px;font-weight:700;color:var(--mute);margin-bottom:8px}
+.ms-slider{flex-wrap:wrap}
+.wbtn.choice{background:#fff;color:var(--ink);border:4px solid var(--ink)}
+.wbtn.choice:active{background:var(--soft)}
+
+/* v3 배치: 여백만 차지하는 정렬을 없애고 줄 전체를 채운다 */
+.ms-modes{display:flex;gap:12px}
+.ms-modes .wchip{flex:1;text-align:center;padding:12px 10px}
+.ms-steps{display:flex;gap:8px;flex-wrap:nowrap}
+.ms-st{flex:1;text-align:center;font-size:20px;padding:8px 4px;white-space:nowrap}
+.ms-ctrl{display:flex;gap:16px;flex-wrap:nowrap}
+.ms-ctrl .wbtn{flex:1;text-align:center;padding:20px 12px}
+.ms-act{min-height:150px;justify-content:flex-start}
+.ms-msg{min-height:0;text-wrap:balance}
+.ms-slider{display:flex;align-items:center;gap:14px;flex-wrap:nowrap}
+.ms-slider .ds-range{flex:1;min-width:120px}
+.ms-slider .wbtn{padding:14px 26px;font-size:26px}
+.ms-barrow{gap:40px}
+.ms-bar{flex:1;max-width:300px;width:auto}
+.ms-left{justify-content:space-between}
+
+/* v4: 모드 칩은 현재 규칙만, 문 클릭으로도 선택 */
+.ms-modes .wchip{flex:1;text-align:center;cursor:default}
+.ms-modes .wchip.sw{cursor:pointer}
+.ms-modes .wchip i{font-style:normal;opacity:.7;margin-left:10px}
+.door.choose{cursor:pointer}
+.door.hl{border-color:var(--ink);background:#ececec}
+.wbtn.choice.hl{background:var(--soft)}
+.ms-hint{font-size:.75em;font-weight:500;color:var(--mute)}
+
+
+html,body{margin:0;background:#fff}
+body{font-family:var(--font);color:var(--ink);word-break:keep-all}
+html,body{overflow-x:hidden}
+#wrap{position:relative;width:100%;overflow:hidden}
+#fit{box-sizing:border-box;transform-origin:top left;position:absolute;left:0;top:0}
+h1{font-size:46px;font-weight:900;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+p.sub{font-size:28px;color:var(--mute);margin:0 0 18px;line-height:1.4;text-wrap:balance}
+.foot{font-size:20px;color:var(--mute);margin-top:14px;line-height:1.4}
+/* 가로 화면: 슬라이드와 같은 2단 배치(설계 폭 1728), 한 화면에 맞춤 */
+#fit.land{width:1888px;padding:24px 80px 16px}
+#fit.land .wid{height:640px}
+/* 세로 화면: 1단(설계 폭 720), 아래로 스크롤 */
+#fit.port{width:720px;padding:24px 40px 36px}
+#fit.port .wid{flex-direction:column;height:auto;gap:22px}
+#fit.port .ms-left,#fit.port .ms-right{flex:none;width:100%}
+#fit.port .ms-doors{gap:14px}#fit.port .door{height:150px;font-size:48px}
+#fit.port .ms-bartrack{min-height:120px}
+#fit.port .ms-barrow{gap:24px}
+#fit.port .ms-left{gap:16px}
+</style></head>
+<body><div id="wrap"><div id="fit" class="port"><h1>몬티홀 게임을 직접 해 봅시다</h1><p class="sub">먼저 문을 고르세요. 진행자가 문을 연 뒤에 선택합니다</p>
+<div class="wid" data-widget='monty_sim' data-config='{}'></div>
+<div class="foot">기록은 이 기기에만 저장되고 선생님께 전송되지 않습니다.</div></div></div>
+<script>/* 슬라이드 인터랙션 위젯: monty_sim(몬티홀 시뮬레이터: 직접 해 보기 + 시도 횟수 슬라이더로 큰 수의 법칙. 외부 라이브러리 없음. */
+(function () {
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function rnd(n) { return Math.floor(Math.random() * n); }
+  function pct(a, b) { return b ? (Math.round(a / b * 1000) / 10) + '%' : '–'; }
+  function btn(label, cls, fn) { var b = el('button', 'wbtn ' + (cls || ''), label); b.type = 'button'; b.addEventListener('click', function (e) { e.stopPropagation(); fn(); b.blur(); }); return b; }
+  var builders = {};
+
+  builders.monty_sim = function (root, cfg) {
+    var knows = cfg.host_knows !== false;
+    var S = { phase: 'pick', car: 0, pick: -1, opened: -1, voided: false, win: null, stay: { w: 0, n: 0 }, sw: { w: 0, n: 0 }, voided_n: 0, rounds: 0, hist: [], trials: 100 };
+    var STEPS = [10, 20, 30, 50, 70, 100, 150, 200, 300, 500, 700, 1000, 1500, 2000, 3000];
+    root.innerHTML = '';
+    var left = el('div', 'ms-left'), right = el('div', 'ms-right');
+    var modes = el('div', 'ms-modes');
+    var doors = el('div', 'ms-doors');
+    var steps = el('div', 'ms-steps');
+    var act = el('div', 'ms-act');
+    var rep = el('div', 'ms-rep');
+    left.appendChild(modes); left.appendChild(steps); left.appendChild(doors); left.appendChild(act); left.appendChild(rep);
+    var bars = el('div', 'ms-bars');
+    right.appendChild(bars);
+    root.appendChild(left); root.appendChild(right);
+
+    function newRound() { S.phase = 'pick'; S.flip = false; S.car = rnd(3); S.pick = -1; S.opened = -1; S.voided = false; S.win = null; draw(); }
+    function resetAll() { if (S.raf) cancelAnimationFrame(S.raf); S.nmax = 0; S.stay = { w: 0, n: 0 }; S.sw = { w: 0, n: 0 }; S.voided_n = 0; S.rounds = 0; S.hist = []; newRound(); }
+    function hostOpen() {
+      var cand = [0, 1, 2].filter(function (d) { return d !== S.pick && (!knows || d !== S.car); });
+      return cand[rnd(cand.length)];
+    }
+    function pick(d) {
+      if (S.phase !== 'pick') return;
+      S.pick = d; S.phase = 'opening'; S.opened = -1; S.flip = false; draw();
+      setTimeout(function () {
+        S.opened = hostOpen(); S.flip = true;
+        if (!knows && S.opened === S.car) { S.voided = true; S.voided_n++; S.phase = 'result'; }
+        else S.phase = 'decide';
+        draw(); S.flip = false;
+      }, 900);
+    }
+    function decide(change) {
+      var final = change ? [0, 1, 2].filter(function (d) { return d !== S.pick && d !== S.opened; })[0] : S.pick;
+      S.win = final === S.car; S.final = final;
+      var t = change ? S.sw : S.stay; t.n++; if (S.win) t.w++;
+      S.rounds++; S.phase = 'result'; S.changed = change; draw();
+    }
+    function auto(k) {
+      if (S.raf) cancelAnimationFrame(S.raf);
+      var full = [], st = { w: 0, n: 0 }, sw = { w: 0, n: 0 }, voided = 0;
+      var step = Math.max(1, Math.floor(k / 150));
+      for (var i = 0; i < k; i++) {
+        var car = rnd(3), p = rnd(3);
+        var cand = [0, 1, 2].filter(function (d) { return d !== p && (!knows || d !== car); });
+        var o = cand[rnd(cand.length)];
+        if (o === car) { voided++; continue; }
+        st.n++; sw.n++;
+        if (p === car) st.w++; else sw.w++;
+        if (st.n % step === 0) full.push([st.n, st.w / st.n, sw.w / sw.n, st.w, sw.w]);
+      }
+      if (st.n && (!full.length || full[full.length - 1][0] !== st.n)) full.push([st.n, st.w / st.n, sw.w / sw.n, st.w, sw.w]);
+      S.stay = { w: 0, n: 0 }; S.sw = { w: 0, n: 0 }; S.voided_n = 0; S.rounds = st.n; S.hist = []; S.nmax = st.n;
+      newRound();
+      if (!full.length) { drawBars(); return; }
+      var t0 = performance.now(), dur = Math.min(2800, 500 + full.length * 16);
+      function frame(now) {
+        var pr = Math.min(1, (now - t0) / dur), m = Math.max(1, Math.round(pr * full.length)), h = full[m - 1];
+        S.hist = full.slice(0, m); S.stay = { w: h[3], n: h[0] }; S.sw = { w: h[4], n: h[0] };
+        S.voided_n = pr < 1 ? Math.round(voided * pr) : voided;
+        drawBars();
+        if (pr < 1) S.raf = requestAnimationFrame(frame); else S.raf = 0;
+      }
+      S.raf = requestAnimationFrame(frame);
+    }
+    function line() {
+      if (S.hist.length < 2) return '<div class="ms-linehint">시도 횟수를 고르고 실행하면 성공 비율이 어떻게 변하는지 그려집니다</div>';
+      var W = 600, H = 170, nmax = S.nmax || S.hist[S.hist.length - 1][0];
+      function X(n) { return 40 + (n / nmax) * (W - 50); }
+      function Y(v) { return 10 + (1 - v) * (H - 30); }
+      var gs = knows ? [[1 / 3, '1/3'], [2 / 3, '2/3']] : [[0.5, '1/2']];
+      var g = gs.map(function (q) { return '<line x1="40" x2="' + (W - 10) + '" y1="' + Y(q[0]) + '" y2="' + Y(q[0]) + '" stroke="#999" stroke-dasharray="6 6"/><text x="4" y="' + (Y(q[0]) + 6) + '" font-size="18" fill="#707072">' + q[1] + '</text>'; }).join('');
+      var pa = S.hist.map(function (h) { return X(h[0]) + ',' + Y(h[1]); }).join(' ');
+      var pb = S.hist.map(function (h) { return X(h[0]) + ',' + Y(h[2]); }).join(' ');
+      return '<svg viewBox="0 0 ' + W + ' ' + H + '" class="ms-svg">' + g + '<polyline points="' + pa + '" fill="none" stroke="#b5b5b6" stroke-width="4"/><polyline points="' + pb + '" fill="none" stroke="#007d48" stroke-width="5"/>' +
+        '<text x="' + (W - 10) + '" y="' + (H - 2) + '" font-size="18" fill="#707072" text-anchor="end">시도 횟수 ' + nmax + '</text></svg>';
+    }
+    function drawBars() {
+      function bar(label, t, color) {
+        var h = t.n ? (t.w / t.n * 100) : 0;
+        return '<div class="ms-bar"><div class="ms-bartrack"><div class="ms-barfill ' + color + '" style="height:' + h + '%"></div></div>' +
+          '<div class="ms-barval">' + pct(t.w, t.n) + '</div><div class="ms-barlab">' + label + '</div><div class="ms-barcnt">' + t.w + ' / ' + t.n + '</div></div>';
+      }
+      bars.innerHTML = '<div class="ms-title">성공 비율 (회색 유지 · 초록 변경)</div><div class="ms-barrow">' + bar('유지', S.stay, 'gray') + bar('변경', S.sw, 'ok') + '</div>' + line() +
+        (S.voided_n ? '<div class="ms-void">진행자가 상품 문을 열어 제외된 판: ' + S.voided_n + '번</div>' : '');
+    }
+    function draw() {
+      modes.innerHTML = '';
+      var canSwitch = cfg.mode_switch !== false;
+      var chip = el('span', 'wchip on' + (canSwitch ? ' sw' : ''), (knows ? '진행자가 정답을 안다' : '진행자가 정답을 모른다') + (canSwitch ? ' <i>⇄</i>' : ''));
+      if (canSwitch) {
+        chip.title = '누르면 반대 규칙으로 바뀝니다';
+        chip.addEventListener('click', function (e) { e.stopPropagation(); knows = !knows; resetAll(); });
+      }
+      modes.appendChild(chip);
+      var cur = { pick: 0, opening: 1, decide: 2, result: 3 }[S.phase];
+      steps.innerHTML = ['① 문 고르기', '② 진행자가 연다', '③ 유지 / 변경', '④ 결과'].map(function (t, k) {
+        return '<span class="ms-st' + (k === cur ? ' now' : (k < cur ? ' done' : '')) + '">' + t + '</span>';
+      }).join('');
+      doors.innerHTML = '';
+      var swap = S.phase === 'decide' ? [0, 1, 2].filter(function (d) { return d !== S.pick && d !== S.opened; })[0] : -1;
+      for (var d = 0; d < 3; d++) {
+        (function (d) {
+          var cls = 'door';
+          var face = String(d + 1);
+          if (S.phase === 'pick') cls += ' pulse';
+          if (S.phase !== 'pick' && d === S.pick) cls += ' picked';
+          if (S.opened === d) { var isCar = d === S.car; cls += ' opened' + (isCar ? ' car' : '') + (S.flip ? ' flip' : ''); face = isCar ? '상품' : '꽝'; }
+          if (S.phase === 'result' && !S.voided) { if (d === S.car) { cls += ' revealcar'; if (S.opened !== d) face = '상품'; } }
+          var tag = (S.phase !== 'pick' && d === S.pick) ? '<em>내 선택</em>' : '';
+          var e = el('div', cls, '<span>' + face + '</span>' + tag);
+          if (S.phase === 'pick') e.addEventListener('click', function (ev) { ev.stopPropagation(); pick(d); });
+          else if (S.phase === 'decide' && (d === S.pick || d === swap)) {
+            e.classList.add('choose');
+            e.addEventListener('click', function (ev) { ev.stopPropagation(); decide(d === swap); });
+          }
+          doors.appendChild(e);
+        })(d);
+      }
+      act.innerHTML = '';
+      var m = el('div', 'ms-msg'); act.appendChild(m);
+      var row = el('div', 'ms-ctrl'); act.appendChild(row);
+      if (S.phase === 'pick') {
+        m.innerHTML = '먼저 <b>문을 하나 눌러</b> 고르세요';
+      } else if (S.phase === 'opening') {
+        m.innerHTML = '<b>' + (S.pick + 1) + '번 문</b>을 골랐습니다. 진행자가 문을 여는 중…';
+      } else if (S.phase === 'decide') {
+        m.innerHTML = '진행자가 <b>' + (S.opened + 1) + '번 문</b>을 열었습니다(꽝). <b>이제 선택하세요</b> <span class="ms-hint">(문이나 아래 버튼을 누르세요)</span>';
+        var kb = btn('유지 · ' + (S.pick + 1) + '번 그대로', 'choice big', function () { decide(false); });
+        var cb = btn('변경 · ' + (swap + 1) + '번으로', 'choice big', function () { decide(true); });
+        kb.setAttribute('data-for', S.pick); cb.setAttribute('data-for', swap);
+        row.appendChild(kb); row.appendChild(cb);
+        [kb, cb].forEach(function (b) {
+          var dr = doors.children[parseInt(b.getAttribute('data-for'), 10)];
+          b.addEventListener('mouseenter', function () { dr.classList.add('hl'); });
+          b.addEventListener('mouseleave', function () { dr.classList.remove('hl'); });
+          dr.addEventListener('mouseenter', function () { b.classList.add('hl'); });
+          dr.addEventListener('mouseleave', function () { b.classList.remove('hl'); });
+        });
+      } else {
+        if (S.voided) m.innerHTML = '진행자가 <b>상품 문</b>을 열어 버렸습니다. 이번 판은 제외됩니다.';
+        else m.innerHTML = '상품은 <b>' + (S.car + 1) + '번 문</b>. ' + (S.changed ? '변경' : '유지') + ' → <b class="' + (S.win ? 'okc' : 'noc') + '">' + (S.win ? '성공' : '실패') + '</b>';
+        row.appendChild(btn('다음 판', 'pri big', newRound));
+      }
+      rep.innerHTML = '<div class="ms-reptitle">여러 번 반복해 보기</div>';
+      var sl = el('div', 'ms-slider');
+      var lab = el('span', 'ms-sllab', '시도 횟수 <b>' + S.trials + '번</b>');
+      var rg = el('input'); rg.type = 'range'; rg.min = 0; rg.max = STEPS.length - 1; rg.step = 1; rg.value = STEPS.indexOf(S.trials); rg.className = 'ds-range';
+      rg.addEventListener('click', function (e) { e.stopPropagation(); });
+      rg.addEventListener('input', function () { S.trials = STEPS[parseInt(rg.value, 10)]; lab.innerHTML = '시도 횟수 <b>' + S.trials + '번</b>'; });
+      sl.appendChild(lab); sl.appendChild(rg); sl.appendChild(btn('실행', 'pri', function () { auto(S.trials); }));
+      sl.appendChild(btn('기록 지우기', 'sec', resetAll));
+      rep.appendChild(sl);
+      drawBars();
+    }
+    newRound();
+  };
+
+  window.initWidgets = function (scope) {
+    [].forEach.call(scope.querySelectorAll('[data-widget]'), function (r) {
+      if (r.__init) return; r.__init = 1;
+      var cfg = {}; try { cfg = JSON.parse(r.getAttribute('data-config') || '{}'); } catch (e) {}
+      var b = builders[r.getAttribute('data-widget')]; if (b) b(r, cfg);
+    });
+  };
+})();
+
+
+(function(){
+  var wrap=document.getElementById('wrap'),f=document.getElementById('fit');
+  function fit(){
+    var w=document.documentElement.clientWidth,h=window.innerHeight,land=(w/h)>1.2;
+    f.className=land?'land':'port';
+    var bw=land?1888:720;
+    var s=land?Math.min(w/bw,h/f.offsetHeight):Math.min(w/bw,1.6);
+    f.style.transform='scale('+s+')';
+    var th=f.offsetHeight*s;
+    f.style.left=Math.max(0,(w-bw*s)/2)+'px';
+    if(land){wrap.style.height=h+'px';f.style.top=Math.max(0,(h-th)/2)+'px';}
+    else{wrap.style.height=Math.ceil(th)+'px';f.style.top='0px';}
+  }
+  window.addEventListener('resize',fit);
+  window.initWidgets(document);fit();setTimeout(fit,300);
+  if(window.ResizeObserver)new ResizeObserver(fit).observe(f);
+})();
+</script></body></html>
